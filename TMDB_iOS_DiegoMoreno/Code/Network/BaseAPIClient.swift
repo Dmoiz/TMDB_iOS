@@ -16,75 +16,40 @@ class BaseAPIClient {
     private var apiKey: String? {
         AppEnvironment.shared.apiKey
     }
-    
-    private lazy var session: URLSession = {
-        let config = URLSessionConfiguration.default
-        config.waitsForConnectivity = true
-        config.timeoutIntervalForRequest = 60
-        config.timeoutIntervalForResource = 60 * 60
-        return URLSession(configuration: config)
-    }()
-    
-    func request<T: Decodable>(
-        relativePath: String,
-        method: HTTPMethodAsync = .get,
-        parameters: [String: Any]? = nil,
-        headers: [String: String]? = nil,
-        responseType: T.Type = T.self
-    ) async throws -> T {
 
-        guard let url = URL(string: relativePath, relativeTo: baseURL) else {
-            throw NetworkError.badResponse
-        }
-
-        var urlRequest = URLRequest(url: url)
-        urlRequest.httpMethod = method.rawValue.uppercased()
+    func request(_ relativePath: String, extraQueryItems: [URLQueryItem] = []) async throws -> (Data, HTTPURLResponse) {
         
-        if let apiKey = apiKey {
-            urlRequest.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        let urlString = baseURL.appendingPathComponent(relativePath)
+        print(urlString)
+        
+        var request = URLRequest(url: urlString)
+        
+        if let token = apiKey {
+            print("Api Key = \(token)")
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            print("No hay")
         }
-
-        if let headers = headers {
-            for (key, value) in headers {
-                urlRequest.setValue(value, forHTTPHeaderField: key)
-            }
-        }
-
-        if method == .get, let parameters = parameters {
-            let query = parameters.map { "\($0.key)=\($0.value)" }.joined(separator: "&")
-            if var components = URLComponents(url: url, resolvingAgainstBaseURL: true) {
-                components.query = query
-                if let newURL = components.url {
-                    urlRequest.url = newURL
-                }
-            }
-        } else if (method == .post || method == .put), let parameters = parameters {
-            urlRequest.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
-            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        }
-
-        let (data, response) = try await session.data(for: urlRequest)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw NetworkError.unkown
-        }
-
-        if !(200...299).contains(httpResponse.statusCode) {
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let response = response as? HTTPURLResponse else {
             throw NetworkError.badResponse
         }
-
-        do {
-            let decodedData = try JSONDecoder().decode(T.self, from: data)
-            return decodedData
-        } catch {
+        
+        if response.statusCode == 200 {
+            return (data, response)
+        }
+        
+        switch response.statusCode {
+        case 401:
+            throw NetworkError.needsAuth
+        case 522:
+            throw NetworkError.serviceDown
+        case 404:
+            throw NetworkError.notFound
+        default:
             throw NetworkError.unkown
         }
     }
-}
-
-enum HTTPMethodAsync: String {
-    case get
-    case post
-    case put
-    case delete
 }

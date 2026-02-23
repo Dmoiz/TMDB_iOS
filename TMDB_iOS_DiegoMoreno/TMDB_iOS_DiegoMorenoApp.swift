@@ -25,7 +25,7 @@ struct TMDB_iOS_DiegoMorenoApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomeView(vm: HomeViewModel())
         }
         .modelContainer(sharedModelContainer)
     }

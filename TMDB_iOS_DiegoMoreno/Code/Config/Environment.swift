@@ -16,16 +16,27 @@ final class AppEnvironment {
     
     
     // MARK: Properties
-    
     private var plistEnvironment: [String: Any]?
     
+    init() {
+        self.plistEnvironment = loadPlist()
+    }
+    
+    private func loadPlist() -> [String: Any]? {
+        if let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
+           let xml = FileManager.default.contents(atPath: path) {
+            return (try? PropertyListSerialization.propertyList(from: xml, format: nil)) as? [String: Any]
+        }
+        return nil
+    }
+    
     var baseURL: String {
-        guard let baseUrl = plistEnvironment?[baseURLKey] as? String else { fatalError("Invalid baseURL at plist") }
-        return baseUrl
+        guard let megabaseUrl = plistEnvironment?[baseURLKey] as? String else { fatalError("Invalid baseURL at plist") }
+        return megabaseUrl
     }
     
     var apiKey: String {
-        guard let apikey = plistEnvironment?[baseURLKey] as? String else {
+        guard let apikey = plistEnvironment?[environmentApiKey] as? String else {
             fatalError("Invalid apiKey at plist") }
         return apikey
         }
