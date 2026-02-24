@@ -16,7 +16,7 @@ class HomeViewModel: ObservableObject {
     @Published var searchText: String = ""
     var isLoading: Bool = false
     private var numberPage: Int = 1
-    private var totalPage: Int = 1
+    private var totalPage: Int = 50
     
     private let homeDataManager = HomeDataManager()
     private let state: CurrentValueSubject<FilmDetailState, Never> = .init(.loading)
@@ -38,8 +38,10 @@ class HomeViewModel: ObservableObject {
     
     func getPopularFilms() async {
         guard !isLoading else { return }
-        
         isLoading = true
+        
+        defer { isLoading = false }
+
         do {
             let response = try await homeDataManager.getPopularFilms(page: numberPage)
             DispatchQueue.main.async {
@@ -59,11 +61,12 @@ class HomeViewModel: ObservableObject {
             self.searchedFilms = []
             return
         }
+                
         do {
             let response = try await homeDataManager.searchFilms(search: search)
             self.searchedFilms = response.results
         } catch {
-            print("Kapaso \(error)")
+            print("Error searching films \(error)")
         }
     }
 }

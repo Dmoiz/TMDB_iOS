@@ -21,12 +21,11 @@ struct HomeView: View {
                 LazyVGrid(columns: [.init(.adaptive(minimum: 140))]) {
                     ForEach(vm.searchText.isEmpty ? vm.popularFilms : vm.searchedFilms) { film in
                         homeList(film: film)
+                    }
+                    if !vm.popularFilms.isEmpty {
+                        ProgressView()
                             .onAppear {
-                                if film.id == vm.popularFilms.last?.id {
-                                    Task {
-                                        await vm.getPopularFilms()
-                                    }
-                                }
+                                Task { await vm.getPopularFilms() }
                             }
                     }
                 }
@@ -55,27 +54,42 @@ private extension HomeView {
     
     func homeList(film: Result) -> some View {
         VStack {
-            AsyncImage(url: URL(string: "https://image.tmdb.org/t/p/w500\(film.posterPath)")) { image in
-                image
-                    .resizable()
-                    .scaledToFill()
-            } placeholder:  {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            if let posterPath = film.posterPath {
+                AsyncImage(url: URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)")) { image in
+                    image
+                        .resizable()
+                        .scaledToFill()
+                } placeholder:  {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                .frame(maxWidth: .infinity)
+                .aspectRatio(2/3, contentMode: .fill)
+                .clipShape(.rect(cornerRadius: 20))
+                .shadow(radius: 20)
+            } else {
+                Rectangle()
+                    .clipShape(.rect(cornerRadius: 20))
+                    .overlay {
+                        HStack {
+                            Text("No image available")
+                                .font(.subheadline)
+                                .foregroundStyle(.white)
+                            Image(systemName: "multiply")
+                                .foregroundStyle(.red)
+                                .scaledToFit()
+                        }
+                    }
             }
-            .frame(maxWidth: .infinity)
-            .aspectRatio(2/3, contentMode: .fill)
-            .clipShape(.rect(cornerRadius: 20))
-            .shadow(radius: 20)
             
-            Text("\(film.title)")
+            Text("\(film.title ?? "")")
                 .font(.headline)
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
                 .frame(height: 15, alignment: .top)
             
             VStack {
-                Text(film.releaseDate)
+                Text(film.releaseDate ?? "")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 
