@@ -17,8 +17,8 @@ class HomeDataManager {
         return dataIn
     }
     
-    func searchFilms(search: String) async throws -> PopularFilmModel {
-        let dataIn = try await decoder.decode(PopularFilmModel.self, from: apiClient.searchFilms(search: search))
+    func searchFilms(page: Int, search: String) async throws -> PopularFilmModel {
+        let dataIn = try await decoder.decode(PopularFilmModel.self, from: apiClient.searchFilms(page: page, query: search))
         return dataIn
     }
     

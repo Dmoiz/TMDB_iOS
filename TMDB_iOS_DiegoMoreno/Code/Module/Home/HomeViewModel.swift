@@ -63,7 +63,7 @@ class HomeViewModel: ObservableObject {
         }
                 
         do {
-            let response = try await homeDataManager.searchFilms(search: search)
+            let response = try await homeDataManager.searchFilms(page: numberPage, search: search)
             self.searchedFilms = response.results
         } catch {
             print("Error searching films \(error)")

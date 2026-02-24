@@ -11,11 +11,22 @@ class HomeAPIClient: BaseAPIClient {
     private let popularMoviesEndpoint = "movie/popular"
     private let searchFilmEndpoint = "search/movie"
     
-    func getPopularMovies(page: Int) async throws -> Data {
-        return try await request(popularMoviesEndpoint, page: page).0
+    private func buildQueryParams(page: Int, query: String? = nil) -> [URLQueryItem] {
+        var items = [URLQueryItem(name: "page", value: "\(page)")]
+        
+        // Solo añadimos la query si tiene contenido (para el buscador)
+        if let query = query, !query.isEmpty {
+            items.append(URLQueryItem(name: "query", value: query))
+        }
+        
+        return items
     }
     
-    func searchFilms(search: String) async throws -> Data {
-        return try await request(searchFilmEndpoint, query: search).0
+    func getPopularMovies(page: Int) async throws -> Data {
+        return try await request(popularMoviesEndpoint, extraQueryItems: buildQueryParams(page: page)).0
+    }
+
+    func searchFilms(page: Int, query: String) async throws -> Data {
+        return try await request(searchFilmEndpoint, extraQueryItems: buildQueryParams(page: page, query: query)).0
     }
 }

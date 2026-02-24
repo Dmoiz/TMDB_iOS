@@ -20,7 +20,7 @@ struct PopularFilmModel: Codable {
 }
 
 // MARK: - Result
-struct Result: Codable, Identifiable {
+struct Result: Codable, Identifiable, Hashable {
     let adult: Bool
     let backdropPath: String?
     let genreIDS: [Int]
@@ -45,5 +45,22 @@ struct Result: Codable, Identifiable {
         case title, video
         case voteAverage = "vote_average"
         case voteCount = "vote_count"
+    }
+    
+    init(adult: Bool = false, backdropPath: String? = "", genreIDS: [Int] = [], id: Int = 0, originalLanguage: String = "", originalTitle: String = "", overview: String = "", popularity: Double = 0, posterPath: String? = "", releaseDate: String? = "", title: String? = "", video: Bool = false, voteAverage: Double = 0, voteCount: Int = 0) {
+        self.adult = adult
+        self.backdropPath = backdropPath
+        self.genreIDS = genreIDS
+        self.id = id
+        self.originalLanguage = originalLanguage
+        self.originalTitle = originalTitle
+        self.overview = overview
+        self.popularity = popularity
+        self.posterPath = posterPath
+        self.releaseDate = releaseDate
+        self.title = title
+        self.video = video
+        self.voteAverage = voteAverage
+        self.voteCount = voteCount
     }
 }

@@ -10,6 +10,7 @@ import SwiftUI
 struct HomeView: View {
     
     @StateObject private var vm: HomeViewModel
+    @State private var selectedFilm: Result?
     
     init(vm: HomeViewModel) {
         self._vm = StateObject(wrappedValue: vm)
@@ -36,6 +37,9 @@ struct HomeView: View {
                 }
             }
             .navigationTitle("Popular Films")
+            .navigationDestination(item: $selectedFilm) { film in
+                FilmView(vm: .init(), film: film)
+            }
             .task {
                 if vm.popularFilms.isEmpty {
                     await vm.getPopularFilms()
@@ -100,5 +104,8 @@ private extension HomeView {
             Spacer(minLength: 0)
         }
         .padding(.bottom, 10)
+        .onTapGesture {
+            selectedFilm = film
+        }
     }
 }
