@@ -9,7 +9,7 @@ import Foundation
 
 class HomeAPIClient: BaseAPIClient {
     private let popularMoviesEndpoint = "movie/popular"
-    func getPopularMovies() async throws -> Data {
-        return try await request(popularMoviesEndpoint).0
+    func getPopularMovies(page: Int) async throws -> Data {
+        return try await request(popularMoviesEndpoint, page: page).0
     }
 }

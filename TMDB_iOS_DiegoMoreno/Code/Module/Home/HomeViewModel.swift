@@ -11,34 +11,32 @@ import Combine
 class HomeViewModel: ObservableObject {
     
     @Published var popularFilms: [Result] = []
+    var isLoading: Bool = false
+    private var numberPage: Int = 1
+    private var totalPage: Int = 1
     
     private let homeDataManager = HomeDataManager()
     private let state: CurrentValueSubject<FilmDetailState, Never> = .init(.loading)
     
     var cancellables = Set<AnyCancellable>()
     
-    init() {
-        getPopularFilms()
-    }
-    
-    func getPopularFilms() {
-        Task {
-            do {
-                let response = try await homeDataManager.getPopularFilms()
-                updateHomeView(with: response.results)
-            } catch let error as NetworkError {
-                state.send(.failure(error))
+    func getPopularFilms() async {
+        guard !isLoading else { return }
+        
+        isLoading = true
+        do {
+            let response = try await homeDataManager.getPopularFilms(page: numberPage)
+            DispatchQueue.main.async {
+                self.popularFilms.append(contentsOf: response.results)
+                self.totalPage = response.totalPages
+                self.numberPage += 1
             }
+            isLoading = false
+        } catch {
+            isLoading = false
+            print("Error cargando pelis: \(error)")
         }
     }
-    
-    private func updateHomeView(with model: [Result]) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            popularFilms.append(contentsOf: model)
-        }
-    }
-    
 }
 
 enum FilmDetailState {

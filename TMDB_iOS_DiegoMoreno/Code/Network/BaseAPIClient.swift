@@ -17,12 +17,21 @@ class BaseAPIClient {
         AppEnvironment.shared.apiKey
     }
 
-    func request(_ relativePath: String, extraQueryItems: [URLQueryItem] = []) async throws -> (Data, HTTPURLResponse) {
+    func request(_ relativePath: String, page: Int) async throws -> (Data, HTTPURLResponse) {
         
         let urlString = baseURL.appendingPathComponent(relativePath)
-        print(urlString)
+        var components = URLComponents(url: urlString, resolvingAgainstBaseURL: true)!
         
-        var request = URLRequest(url: urlString)
+        let queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "page", value: "\(page)")
+        ]
+        
+        components.queryItems = queryItems
+        
+        guard let finalURL = components.url else { throw URLError(.badURL) }
+        print(finalURL)
+        
+        var request = URLRequest(url: finalURL)
         
         if let token = apiKey {
             print("Api Key = \(token)")

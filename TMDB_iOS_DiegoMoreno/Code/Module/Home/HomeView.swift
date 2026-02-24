@@ -21,9 +21,25 @@ struct HomeView: View {
             LazyVGrid(columns: [.init(.adaptive(minimum: 140))]) {
                 ForEach(vm.popularFilms) { film in
                     homeList(film: film)
+                        .onAppear {
+                            if film.id == vm.popularFilms.last?.id {
+                                Task {
+                                    await vm.getPopularFilms()
+                                }
+                            }
+                        }
                 }
             }
             .padding(8)
+            if vm.isLoading {
+                ProgressView()
+                    .padding()
+            }
+        }
+        .task {
+            if vm.popularFilms.isEmpty {
+                await vm.getPopularFilms()
+            }
         }
     }
 }

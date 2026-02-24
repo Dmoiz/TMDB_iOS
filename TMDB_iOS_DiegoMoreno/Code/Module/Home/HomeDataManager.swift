@@ -11,9 +11,9 @@ class HomeDataManager {
     
     private let apiClient = HomeAPIClient()
     
-    func getPopularFilms() async throws -> PopularFilmModel {
+    func getPopularFilms(page: Int) async throws -> PopularFilmModel {
         let decoder = JSONDecoder()
-        let dataIn = try await decoder.decode(PopularFilmModel.self, from: apiClient.getPopularMovies())
+        let dataIn = try await decoder.decode(PopularFilmModel.self, from: apiClient.getPopularMovies(page: page))
         return dataIn
     }
     

@@ -31,8 +31,8 @@ final class AppEnvironment {
     }
     
     var baseURL: String {
-        guard let megabaseUrl = plistEnvironment?[baseURLKey] as? String else { fatalError("Invalid baseURL at plist") }
-        return megabaseUrl
+        guard let baseUrl = plistEnvironment?[baseURLKey] as? String else { fatalError("Invalid baseURL at plist") }
+        return baseUrl
     }
     
     var apiKey: String {
