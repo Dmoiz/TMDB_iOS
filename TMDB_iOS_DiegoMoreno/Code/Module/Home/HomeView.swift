@@ -17,15 +17,54 @@ struct HomeView: View {
     }
     
     var body: some View {
-        Text("Se ve")
-        LazyVStack {
-            ForEach(vm.popularFilms) { film in
-                Text("\(film.title)")
+        ScrollView {
+            LazyVGrid(columns: [.init(.adaptive(minimum: 140))]) {
+                ForEach(vm.popularFilms) { film in
+                    homeList(film: film)
+                }
             }
+            .padding(8)
         }
     }
 }
 
 #Preview {
     HomeView(vm: .init())
+}
+
+private extension HomeView {
+    
+    func homeList(film: Result) -> some View {
+        VStack {
+            AsyncImage(url: URL(string: "https://image.tmdb.org/t/p/w500\(film.posterPath)")) { image in
+                image
+                    .resizable()
+                    .scaledToFill()
+            } placeholder:  {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            .frame(maxWidth: .infinity)
+            .aspectRatio(2/3, contentMode: .fill)
+            .clipShape(.rect(cornerRadius: 20))
+            
+            Text("\(film.title)")
+                .font(.headline)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
+                .frame(height: 15, alignment: .top)
+            
+            VStack {
+                Text(film.releaseDate)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                
+                Text(String(format: "%.1f ★", film.voteAverage))
+                    .font(.caption2)
+                    .bold()
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.bottom, 10)
+    }
 }
