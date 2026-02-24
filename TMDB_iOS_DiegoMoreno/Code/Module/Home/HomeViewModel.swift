@@ -8,9 +8,12 @@
 import Foundation
 import Combine
 
+@MainActor
 class HomeViewModel: ObservableObject {
     
     @Published var popularFilms: [Result] = []
+    @Published var searchedFilms: [Result] = []
+    @Published var searchText: String = ""
     var isLoading: Bool = false
     private var numberPage: Int = 1
     private var totalPage: Int = 1
@@ -19,6 +22,19 @@ class HomeViewModel: ObservableObject {
     private let state: CurrentValueSubject<FilmDetailState, Never> = .init(.loading)
     
     var cancellables = Set<AnyCancellable>()
+    
+    init() {
+        $searchText
+            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
+            .removeDuplicates()
+            .sink { [weak self] query in
+                Task {
+                    await self?.searchFilm(search: query)
+                }
+                
+            }
+            .store(in: &cancellables)
+    }
     
     func getPopularFilms() async {
         guard !isLoading else { return }
@@ -34,7 +50,20 @@ class HomeViewModel: ObservableObject {
             isLoading = false
         } catch {
             isLoading = false
-            print("Error cargando pelis: \(error)")
+            print("Error loading films: \(error)")
+        }
+    }
+    
+    func searchFilm(search: String) async {
+        guard !searchText.isEmpty else {
+            self.searchedFilms = []
+            return
+        }
+        do {
+            let response = try await homeDataManager.searchFilms(search: search)
+            self.searchedFilms = response.results
+        } catch {
+            print("Kapaso \(error)")
         }
     }
 }
