@@ -14,16 +14,17 @@ class HomeViewModel: ObservableObject {
     @Published var popularFilms: [Result] = []
     @Published var searchedFilms: [Result] = []
     @Published var searchText: String = ""
-    var isLoading: Bool = false
+    @Published var isLoading: Bool = false
     private var numberPage: Int = 1
-    private var totalPage: Int = 50
+    private var totalPage: Int = 1
     
-    private let homeDataManager = HomeDataManager()
-    private let state: CurrentValueSubject<FilmDetailState, Never> = .init(.loading)
+    private let dataManager: HomeDataManagerProtocol
     
     var cancellables = Set<AnyCancellable>()
     
-    init() {
+    init(dataManager: HomeDataManagerProtocol) {
+        self.dataManager = dataManager
+        
         $searchText
             .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
             .removeDuplicates()
@@ -43,7 +44,7 @@ class HomeViewModel: ObservableObject {
         defer { isLoading = false }
 
         do {
-            let response = try await homeDataManager.getPopularFilms(page: numberPage)
+            let response = try await dataManager.getPopularFilms(page: numberPage)
             DispatchQueue.main.async {
                 self.popularFilms.append(contentsOf: response.results)
                 self.totalPage = response.totalPages
@@ -57,22 +58,16 @@ class HomeViewModel: ObservableObject {
     }
     
     func searchFilm(search: String) async {
-        guard !searchText.isEmpty else {
+        guard !search.isEmpty else {
             self.searchedFilms = []
             return
         }
                 
         do {
-            let response = try await homeDataManager.searchFilms(page: numberPage, search: search)
+            let response = try await dataManager.searchFilms(page: numberPage, search: search)
             self.searchedFilms = response.results
         } catch {
-            print("Error searching films \(error)")
+            print("Error searching films: \(error)")
         }
     }
-}
-
-enum FilmDetailState {
- case loading
- case success(String)
- case failure(NetworkError)
 }

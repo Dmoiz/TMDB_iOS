@@ -22,8 +22,6 @@ class BaseAPIClient {
         let urlString = baseURL.appendingPathComponent(relativePath)
         var components = URLComponents(url: urlString, resolvingAgainstBaseURL: true)!
         
-        
-        
         if !extraQueryItems.isEmpty {
             components.queryItems = extraQueryItems
         }

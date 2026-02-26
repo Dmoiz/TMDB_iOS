@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct FilmDetailModel: Codable {
+struct FilmDetailModel: Codable, Hashable, Equatable {
     let adult: Bool?
     let backdropPath: String?
     let belongsToCollection: BelongsToCollection?
@@ -53,7 +53,7 @@ struct FilmDetailModel: Codable {
 }
 
 // MARK: - BelongsToCollection
-struct BelongsToCollection: Codable {
+struct BelongsToCollection: Codable, Equatable, Hashable {
     let id: Int?
     let name, posterPath, backdropPath: String?
 
@@ -65,13 +65,13 @@ struct BelongsToCollection: Codable {
 }
 
 // MARK: - Genre
-struct Genre: Codable, Identifiable {
+struct Genre: Codable, Identifiable, Equatable, Hashable {
     let id: Int?
     let name: String?
 }
 
 // MARK: - ProductionCompany
-struct ProductionCompany: Codable {
+struct ProductionCompany: Codable, Equatable, Hashable {
     let id: Int?
     let logoPath, name, originCountry: String?
 
@@ -84,7 +84,7 @@ struct ProductionCompany: Codable {
 }
 
 // MARK: - ProductionCountry
-struct ProductionCountry: Codable {
+struct ProductionCountry: Codable, Equatable, Hashable {
     let iso3166_1, name: String?
 
     enum CodingKeys: String, CodingKey {
@@ -94,7 +94,7 @@ struct ProductionCountry: Codable {
 }
 
 // MARK: - SpokenLanguage
-struct SpokenLanguage: Codable {
+struct SpokenLanguage: Codable, Equatable, Hashable {
     let englishName, iso639_1, name: String?
 
     enum CodingKeys: String, CodingKey {

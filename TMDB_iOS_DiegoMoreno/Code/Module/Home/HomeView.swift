@@ -9,36 +9,37 @@ import SwiftUI
 
 struct HomeView: View {
     
-    @StateObject private var vm: HomeViewModel
+    @StateObject var vm: HomeViewModel
     @State private var selectedFilm: Result?
     
-    init(vm: HomeViewModel) {
-        self._vm = StateObject(wrappedValue: vm)
+    enum Constants {
+        static let columnSize: CGFloat = 140
+        static let aspectRatio: CGFloat = 2/3
+        static let cornerRadius: CGFloat = 20
+        static let shadowRadius: CGFloat = 20
     }
     
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVGrid(columns: [.init(.adaptive(minimum: 140))]) {
+                LazyVGrid(columns: [.init(.adaptive(minimum: Constants.columnSize))]) {
                     ForEach(vm.searchText.isEmpty ? vm.popularFilms : vm.searchedFilms) { film in
                         homeList(film: film)
                     }
                     if !vm.popularFilms.isEmpty {
-                        ProgressView()
-                            .onAppear {
-                                Task { await vm.getPopularFilms() }
-                            }
+                        loadingScreen
+
                     }
                 }
+
                 .padding(8)
                 if vm.isLoading {
-                    ProgressView()
-                        .padding()
+                    loadingScreen
                 }
             }
             .navigationTitle("Popular Films")
             .navigationDestination(item: $selectedFilm) { film in
-                FilmView(vm: .init(), film: film)
+                FilmView(vm: ViewModelFactory.filmViewModel(), film: film)
             }
             .task {
                 if vm.popularFilms.isEmpty {
@@ -47,11 +48,10 @@ struct HomeView: View {
             }
             .searchable(text: $vm.searchText, placement: .navigationBarDrawer, prompt: "Search")
         }
+        .onAppear {
+            Task { await vm.getPopularFilms() }
+        }
     }
-}
-
-#Preview {
-    HomeView(vm: .init())
 }
 
 private extension HomeView {
@@ -68,12 +68,12 @@ private extension HomeView {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 .frame(maxWidth: .infinity)
-                .aspectRatio(2/3, contentMode: .fill)
-                .clipShape(.rect(cornerRadius: 20))
-                .shadow(radius: 20)
+                .aspectRatio(Constants.aspectRatio, contentMode: .fill)
+                .clipShape(.rect(cornerRadius: Constants.cornerRadius))
+                .shadow(radius: Constants.shadowRadius)
             } else {
                 Rectangle()
-                    .clipShape(.rect(cornerRadius: 20))
+                    .clipShape(.rect(cornerRadius: Constants.cornerRadius))
                     .overlay {
                         HStack {
                             Text("No image available")
@@ -108,4 +108,13 @@ private extension HomeView {
             selectedFilm = film
         }
     }
+    
+    var loadingScreen: some View {
+        ProgressView()
+            .padding()
+    }
+}
+
+#Preview {
+    HomeView(vm: ViewModelFactory.homeViewModel())
 }

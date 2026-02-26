@@ -7,19 +7,22 @@
 
 import Foundation
 
-class HomeDataManager {
+protocol HomeDataManagerProtocol {
+    func getPopularFilms(page: Int) async throws -> PopularFilmModel
+    func searchFilms(page: Int, search: String) async throws -> PopularFilmModel
+}
+
+class HomeDataManager: HomeDataManagerProtocol {
     
     private let apiClient = HomeAPIClient()
     private let decoder = JSONDecoder()
     
     func getPopularFilms(page: Int) async throws -> PopularFilmModel {
-        let dataIn = try await decoder.decode(PopularFilmModel.self, from: apiClient.getPopularMovies(page: page))
-        return dataIn
+        try await decoder.decode(PopularFilmModel.self, from: apiClient.getPopularMovies(page: page))
     }
     
     func searchFilms(page: Int, search: String) async throws -> PopularFilmModel {
-        let dataIn = try await decoder.decode(PopularFilmModel.self, from: apiClient.searchFilms(page: page, query: search))
-        return dataIn
+        try await decoder.decode(PopularFilmModel.self, from: apiClient.searchFilms(page: page, query: search))
     }
     
 }

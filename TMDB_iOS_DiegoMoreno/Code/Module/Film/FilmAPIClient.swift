@@ -7,15 +7,18 @@
 
 import Foundation
 
-class FilmAPIClient: BaseAPIClient {
-    private let filmIDEndpoint = "movie/"
-    private let similarFilmEndpoint = "/similar"
+protocol FilmAPIClientProtocol {
+    func getFilmDetail(filmID: Int) async throws -> Data
+    func getSimilarFilms(filmID: Int) async throws -> Data
+}
+
+class FilmAPIClient: BaseAPIClient, FilmAPIClientProtocol {
     
     func getFilmDetail(filmID: Int) async throws -> Data {
-        return try await request("\(filmIDEndpoint)\(filmID)").0
+        return try await request("\(AppEnvironment.filmIDEndpoint)\(filmID)").0
     }
     
     func getSimilarFilms(filmID: Int) async throws -> Data {
-        return try await request("\(filmIDEndpoint)\(filmID)\(similarFilmEndpoint)").0
+        return try await request("\(AppEnvironment.filmIDEndpoint)\(filmID)\(AppEnvironment.similarFilmEndpoint)").0
     }
 }

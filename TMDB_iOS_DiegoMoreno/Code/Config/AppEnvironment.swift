@@ -12,6 +12,11 @@ final class AppEnvironment {
     let baseURLKey = "baseURL"
     let environmentApiKey = "apiKey"
     
+    static let popularEndpoint = "movie/popular"
+    static let searchFilmEndpoint = "search/movie"
+    static let filmIDEndpoint = "movie/"
+    static let similarFilmEndpoint = "/similar"
+    
     static let shared = AppEnvironment()
     
     
@@ -39,5 +44,5 @@ final class AppEnvironment {
         guard let apikey = plistEnvironment?[environmentApiKey] as? String else {
             fatalError("Invalid apiKey at plist") }
         return apikey
-        }
     }
+}

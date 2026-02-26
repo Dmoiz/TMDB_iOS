@@ -7,7 +7,12 @@
 
 import Foundation
 
-class FilmDataManager {
+protocol FilmDataManagerProtocol {
+    func getFilmDetail(filmID: Int) async throws -> FilmDetailModel
+    func getSimilarFilms(filmID: Int) async throws -> SimilarFilmModel
+}
+
+class FilmDataManager: FilmDataManagerProtocol {
     private let apiClient = FilmAPIClient()
     let decoder = JSONDecoder()
     
